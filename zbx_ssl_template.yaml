@@ -1,0 +1,99 @@
+zabbix_export:
+  version: '5.4'
+  date: '2021-10-22T12:27:53Z'
+  groups:
+    -
+      uuid: 43d0fe04c7094000829b0d28c6e3470c
+      name: 'Custom Templates'
+    -
+      uuid: 7df96b18c230490a9a0a9e2307226338
+      name: Templates
+  templates:
+    -
+      uuid: b850d1738dc64cfcbe9cf634501da8fb
+      template: 'Check SSL Cert Expr Date'
+      name: 'Check SSL Cert Expr Date'
+      groups:
+        -
+          name: 'Custom Templates'
+        -
+          name: Templates
+      items:
+        -
+          uuid: 20f21d56cd7843da8d88ddda74cc349d
+          name: 'HTTPS Service is running'
+          key: 'net.tcp.service[https]'
+          delay: 10m
+          history: 14d
+          triggers:
+            -
+              uuid: 3103b7db2d18499b8f7c43c1dc538eed
+              expression: 'last(/Check SSL Cert Expr Date/net.tcp.service[https],#2)=0'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'last(/Check SSL Cert Expr Date/net.tcp.service[https],#1)>=1'
+              name: 'SSL Service not running on {$HOSTNAME}'
+              priority: AVERAGE
+              manual_close: 'YES'
+        -
+          uuid: 1fc96fb0a9c74aabbae41f0c6af754ca
+          name: 'Min Expiration Time SSL Cert'
+          type: DEPENDENT
+          key: ssl.min.value
+          delay: '0'
+          history: 7d
+          units: days
+          preprocessing:
+            -
+              type: REGEX
+              parameters:
+                - '([1-9]+)'
+                - \1
+          master_item:
+            key: 'zext_ssl_cert.sh[-p,{$SSL_PORT}, -d, {$DOMAIN}]'
+        -
+          uuid: cba4327901444a0c81a37b53b87bad75
+          name: 'SSL Certs Expirations (ALL)'
+          type: EXTERNAL
+          key: 'zext_ssl_cert.sh[-p,{$SSL_PORT}, -d, {$DOMAIN}]'
+          delay: 1d
+          history: 7d
+          trends: '0'
+          value_type: TEXT
+          triggers:
+            -
+              uuid: 2aa076e7b64048e78a185538986ad046
+              expression: 'last(/Check SSL Cert Expr Date/zext_ssl_cert.sh[-p,{$SSL_PORT}, -d, {$DOMAIN}],#1)<>1'
+              recovery_mode: NONE
+              name: 'The ssl certificate on {ITEM.LASTVALUE} almost expired'
+              status: DISABLED
+              priority: AVERAGE
+              dependencies:
+                -
+                  name: 'The ssl certificate on {ITEM.LASTVALUE2} has less than {ITEM.LASTVALUE}  before expiration'
+                  expression: 'last(/Check SSL Cert Expr Date/ssl.min.value,#1)<=30 and last(/Check SSL Cert Expr Date/zext_ssl_cert.sh[-p,{$SSL_PORT}, -d, {$DOMAIN}],#1)<>0'
+                  recovery_expression: 'last(/Check SSL Cert Expr Date/ssl.min.value)>30'
+      macros:
+        -
+          macro: '{$DOMAIN}'
+          value: localhost
+        -
+          macro: '{$SSL_PORT}'
+          value: '443'
+  triggers:
+    -
+      uuid: 1a4cf8d17c6b477288f2f3b7d17b4be3
+      expression: 'last(/Check SSL Cert Expr Date/ssl.min.value,#1)<=7 and last(/Check SSL Cert Expr Date/zext_ssl_cert.sh[-p,{$SSL_PORT}, -d, {$DOMAIN}],#1)<>0'
+      recovery_mode: RECOVERY_EXPRESSION
+      recovery_expression: 'last(/Check SSL Cert Expr Date/ssl.min.value)>30'
+      name: 'The ssl certificate on {ITEM.LASTVALUE2} has less than {ITEM.LASTVALUE}  before expiration'
+      priority: HIGH
+      manual_close: 'YES'
+    -
+      uuid: df2f0bf1d0a744639e074c8851c93972
+      expression: 'last(/Check SSL Cert Expr Date/ssl.min.value,#1)<=30 and last(/Check SSL Cert Expr Date/zext_ssl_cert.sh[-p,{$SSL_PORT}, -d, {$DOMAIN}],#1)<>0'
+      recovery_mode: RECOVERY_EXPRESSION
+      recovery_expression: 'last(/Check SSL Cert Expr Date/ssl.min.value)>30'
+      name: 'The ssl certificate on {ITEM.LASTVALUE2} has less than {ITEM.LASTVALUE}  before expiration'
+      event_name: 'The ssl certificate on {ITEM.LASTVALUE2} has less than {ITEM.LASTVALUE}  before expiration'
+      priority: AVERAGE
+      manual_close: 'YES'
