@@ -8,6 +8,7 @@ What this script can?
 * Monitor one or list of domains ssl certififcates expiration dates
 * Send notifications before 30 and 7 days expiration of certificates
 
+/This script inspired by script from aperto.fr you can find it with .original defenition/
 ____
 How to install it and use?
 

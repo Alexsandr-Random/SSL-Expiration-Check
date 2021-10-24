@@ -1,6 +1,6 @@
 zabbix_export:
   version: '5.4'
-  date: '2021-10-22T12:27:53Z'
+  date: '2021-10-24T12:11:33Z'
   groups:
     -
       uuid: 43d0fe04c7094000829b0d28c6e3470c
@@ -40,7 +40,7 @@ zabbix_export:
           type: DEPENDENT
           key: ssl.min.value
           delay: '0'
-          history: 7d
+          history: 30d
           units: days
           preprocessing:
             -
@@ -55,23 +55,9 @@ zabbix_export:
           name: 'SSL Certs Expirations (ALL)'
           type: EXTERNAL
           key: 'zext_ssl_cert.sh[-p,{$SSL_PORT}, -d, {$DOMAIN}]'
-          delay: 1d
-          history: 7d
+          history: 30d
           trends: '0'
           value_type: TEXT
-          triggers:
-            -
-              uuid: 2aa076e7b64048e78a185538986ad046
-              expression: 'last(/Check SSL Cert Expr Date/zext_ssl_cert.sh[-p,{$SSL_PORT}, -d, {$DOMAIN}],#1)<>1'
-              recovery_mode: NONE
-              name: 'The ssl certificate on {ITEM.LASTVALUE} almost expired'
-              status: DISABLED
-              priority: AVERAGE
-              dependencies:
-                -
-                  name: 'The ssl certificate on {ITEM.LASTVALUE2} has less than {ITEM.LASTVALUE}  before expiration'
-                  expression: 'last(/Check SSL Cert Expr Date/ssl.min.value,#1)<=30 and last(/Check SSL Cert Expr Date/zext_ssl_cert.sh[-p,{$SSL_PORT}, -d, {$DOMAIN}],#1)<>0'
-                  recovery_expression: 'last(/Check SSL Cert Expr Date/ssl.min.value)>30'
       macros:
         -
           macro: '{$DOMAIN}'
@@ -97,3 +83,8 @@ zabbix_export:
       event_name: 'The ssl certificate on {ITEM.LASTVALUE2} has less than {ITEM.LASTVALUE}  before expiration'
       priority: AVERAGE
       manual_close: 'YES'
+      dependencies:
+        -
+          name: 'The ssl certificate on {ITEM.LASTVALUE2} has less than {ITEM.LASTVALUE}  before expiration'
+          expression: 'last(/Check SSL Cert Expr Date/ssl.min.value,#1)<=7 and last(/Check SSL Cert Expr Date/zext_ssl_cert.sh[-p,{$SSL_PORT}, -d, {$DOMAIN}],#1)<>0'
+          recovery_expression: 'last(/Check SSL Cert Expr Date/ssl.min.value)>30'
