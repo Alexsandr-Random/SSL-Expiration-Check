@@ -56,7 +56,8 @@ for i in ${fday[@]}; do
     (( $i < min || min == 0)) && min=$i
 done
 #Almost expiried cert
-echo "${final[@]}" | grep -o -E "[a-z0-9]+\.[a-z]+\.*[a-z]+:$min"
+#echo "${final[@]}" | grep -o -E "[a-z0-9]+\.[a-z]+\.*[a-z]+:$min"
+echo "${final[@]}" | grep -o -E "[a-z0-9]+\.[.0-9a-z]*[.a-z]*:$min"
 #certificate with maximum expiration date 
 #Uncomment if you want this option. 
 #echo "${final[@]}" | grep -o -E "[a-z0-9]+\.[a-z]+\.*[a-z]+:$max"
@@ -64,7 +65,7 @@ echo "${final[@]}" | grep -o -E "[a-z0-9]+\.[a-z]+\.*[a-z]+:$min"
 #echo "min=$min, max=$max"
 ;;
 esac
-break
+shift
 done
 
 
