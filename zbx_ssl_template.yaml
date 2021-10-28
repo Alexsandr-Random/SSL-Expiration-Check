@@ -1,6 +1,6 @@
 zabbix_export:
   version: '5.4'
-  date: '2021-10-24T12:11:33Z'
+  date: '2021-10-28T07:42:12Z'
   groups:
     -
       uuid: 43d0fe04c7094000829b0d28c6e3470c
@@ -46,7 +46,7 @@ zabbix_export:
             -
               type: REGEX
               parameters:
-                - '([1-9]+)'
+                - '([0-9]+)'
                 - \1
           master_item:
             key: 'zext_ssl_cert.sh[-p,{$SSL_PORT}, -d, {$DOMAIN}]'
@@ -55,6 +55,7 @@ zabbix_export:
           name: 'SSL Certs Expirations (ALL)'
           type: EXTERNAL
           key: 'zext_ssl_cert.sh[-p,{$SSL_PORT}, -d, {$DOMAIN}]'
+          delay: 1h
           history: 30d
           trends: '0'
           value_type: TEXT
