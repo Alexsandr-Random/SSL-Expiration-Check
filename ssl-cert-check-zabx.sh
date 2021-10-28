@@ -9,7 +9,7 @@
 while [ -n "$1" ]
 do
 #default port value if port not specified will using 443
-port="443"
+#port="443"
 #choosing options which you specified and processing
 case $1 in
 -p)
